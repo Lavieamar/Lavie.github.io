@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>Mini Snake Game</title>
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<style>
+		body {
+            font-family: 'Segoe UI', Arial, sans-serif;
+            background: linear-gradient(135deg, #1a1a40 60%, #3f2b96 100%);
+            color: #e0e0ff;
+            margin: 0;
+			text-align: center;
+        }
+        header {
+            background: #23235b;
+            padding: 32px 0 20px 0;
+            text-align: center;
+            box-shadow: 0 2px 8px rgba(63,43,150,0.2);
+        }
+        header h1 {
+            margin: 0;
+            font-size: 3em;
+            letter-spacing: 2px;
+            color: #a259ff;
+            text-shadow: 0 2px 8px #23235b;
+        }
+        nav {
+            background: #2d2d6a;
+            padding: 14px 0;
+            text-align: center;
+            box-shadow: 0 2px 8px rgba(162,89,255,0.15);
+        }
+        nav a {
+            color: #e0e0ff;
+            margin: 0 18px;
+            text-decoration: none;
+            font-weight: bold;
+            font-size: 1.1em;
+            transition: color 0.2s, border-bottom 0.2s;
+            border-bottom: 2px solid transparent;
+            padding-bottom: 2px;
+        }
+        nav a:hover {
+            color: #a259ff;
+            border-bottom: 2px solid #a259ff;
+        }
+        .container {
+            max-width: 900px;
+            margin: 40px auto;
+            padding: 0 24px;
+        }
+        article {
+            background: #23235b;
+            margin-bottom: 32px;
+            padding: 28px 24px;
+            border-radius: 12px;
+            box-shadow: 0 4px 16px rgba(162,89,255,0.08);
+            transition: box-shadow 0.2s;
+        }
+        article:hover {
+            box-shadow: 0 8px 32px rgba(162,89,255,0.15);
+        }
+        article h2 {
+            margin-top: 0;
+            color: #a259ff;
+            font-size: 2em;
+        }
+        .author {
+            font-size: 1em;
+            color: #b2aaff;
+            margin-bottom: 14px;
+        }
+        article p {
+            font-size: 1.15em;
+            line-height: 1.7;
+        }
+        footer {
+            background: #23235b;
+            text-align: center;
+            padding: 18px 0;
+            margin-top: 48px;
+            color: #b2aaff;
+            font-size: 1em;
+            letter-spacing: 1px;
+        }
+		#gameContainer {
+			background: #23235b;
+			border-radius: 16px;
+			box-shadow: 0 4px 16px rgba(162,89,255,0.15);
+			padding: 32px 24px;
+			margin-top: 24px;
+			display: flex;
+			flex-direction: column;
+			align-items: center;
+		}
+		canvas {
+			background: #1a1a40;
+			border: 2px solid #a259ff;
+			border-radius: 8px;
+			display: block;
+		}
+		#score {
+			margin: 18px 0 0 0;
+			font-size: 1.2em;
+			color: #e0e0ff;
+		}
+		#instructions {
+			margin-top: 12px;
+			color: #b2aaff;
+			font-size: 1em;
+		}
+	</style>
+</head>
+<body>
+	<h1>Mini Snake Game</h1>
+	<nav>
+    <a href="index.html">בית</a>
+    <a href="https://youtube.com/channel/UCQQds43Igj_gA-79RFYHzDw?si=SuJ158rUHPYsifFD">יוטיוב</a>
+	<a href="snake.html">משחק נחש</a>
+    </nav>
+	<div id="gameContainer">
+		<canvas id="gameCanvas" width="400" height="400"></canvas>
+		<div id="score">Score: 0</div>
+		<div id="instructions">Use arrow keys to move the snake</div>
+	</div>
+	<script>
+	const canvas = document.getElementById('gameCanvas');
+	const ctx = canvas.getContext('2d');
+	const box = 20;
+	let snake = [{x: 9 * box, y: 10 * box}];
+	let direction = 'RIGHT';
+	let food = {
+		x: Math.floor(Math.random() * 20) * box,
+		y: Math.floor(Math.random() * 20) * box
+	};
+	let score = 0;
+	let gameOver = false;
+
+	document.addEventListener('keydown', changeDirection);
+
+	function changeDirection(e) {
+		if (gameOver) return;
+		if (e.key === 'ArrowLeft' && direction !== 'RIGHT') direction = 'LEFT';
+		else if (e.key === 'ArrowUp' && direction !== 'DOWN') direction = 'UP';
+		else if (e.key === 'ArrowRight' && direction !== 'LEFT') direction = 'RIGHT';
+		else if (e.key === 'ArrowDown' && direction !== 'UP') direction = 'DOWN';
+	}
+
+	function draw() {
+		ctx.clearRect(0, 0, canvas.width, canvas.height);
+		// Draw snake
+		for (let i = 0; i < snake.length; i++) {
+			ctx.fillStyle = i === 0 ? '#a259ff' : '#3f2b96';
+			ctx.fillRect(snake[i].x, snake[i].y, box, box);
+			ctx.strokeStyle = '#e0e0ff';
+			ctx.strokeRect(snake[i].x, snake[i].y, box, box);
+		}
+		// Draw food
+		ctx.fillStyle = '#e0e0ff';
+		ctx.fillRect(food.x, food.y, box, box);
+
+		// Move snake
+		let headX = snake[0].x;
+		let headY = snake[0].y;
+		if (direction === 'LEFT') headX -= box;
+		if (direction === 'UP') headY -= box;
+		if (direction === 'RIGHT') headX += box;
+		if (direction === 'DOWN') headY += box;
+
+		// Check collision with food
+		if (headX === food.x && headY === food.y) {
+			score++;
+			document.getElementById('score').textContent = 'Score: ' + score;
+			food = {
+				x: Math.floor(Math.random() * 20) * box,
+				y: Math.floor(Math.random() * 20) * box
+			};
+		} else {
+			snake.pop();
+		}
+
+		// Check collision with walls
+		if (headX < 0 || headX >= canvas.width || headY < 0 || headY >= canvas.height) {
+			endGame();
+			return;
+		}
+		// Check collision with self
+		for (let i = 0; i < snake.length; i++) {
+			if (headX === snake[i].x && headY === snake[i].y) {
+				endGame();
+				return;
+			}
+		}
+
+		snake.unshift({x: headX, y: headY});
+	}
+
+	function endGame() {
+		gameOver = true;
+		document.getElementById('instructions').textContent = 'Game Over! Refresh to play again.';
+	}
+
+	function gameLoop() {
+		if (!gameOver) {
+			draw();
+		}
+	}
+	setInterval(gameLoop, 120);
+	</script>
+	
+</body>
+</html>
